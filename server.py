@@ -36,8 +36,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print("Got a request of: %s\n" % self.data)
 
         # Request path
-        request_path = self.data.decode().split(" ")[1]
+        method, request_path = self.data.decode().split(" ")[0:2]
         print(f"Request path: {request_path}")
+
+        if method != "GET":
+            self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r", "utf-8"))
+
 
         if not (request_path.endswith("/") or request_path.endswith(".html") or request_path.endswith(".css")):
             request_path += "/"
@@ -53,9 +57,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 # If it doesn't end with .index.html, add it and if it has a / at the end remove it
                 if request_path[-1] == "/":
                     request_path = request_path[:-1]
-                if request_path.endswith(".html"):
-                    html_path = f"./www{request_path}"
-                elif request_path.endswith(".css"):
+                if request_path.endswith(".html") or request_path.endswith(".css"):
                     html_path = f"./www{request_path}"
                 else:
                     html_path = f"./www{request_path}/index.html"
@@ -63,7 +65,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             print(f"HTML path: {html_path}")
 
             # Check if the file exists and send the file
-            if html_path != "" and os.path.isfile(html_path):
+            if os.path.isfile(html_path):
                 # Open the files
                 html_file = open(html_path, "r")
                 file_content = html_file.read()
