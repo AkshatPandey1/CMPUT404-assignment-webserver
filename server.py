@@ -41,7 +41,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if method != "GET":
             self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r", "utf-8"))
 
-
         if not (request_path.endswith("/") or request_path.endswith(".html") or request_path.endswith(".css")):
             request_path += "/"
             self.request.sendall(bytes(
@@ -72,6 +71,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 else:
                     headers += "Content-Type: text/html; charset=utf-8\n"
                 response = headers + file_content
+                html_file.close()
                 self.request.sendall(response.encode())
             else:
                 self.request.sendall(bytearray("HTTP/1.1 404 Not Found", "utf-8"))
