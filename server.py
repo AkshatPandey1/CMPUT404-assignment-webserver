@@ -36,7 +36,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print("Got a request of: %s\n" % self.data)
 
         # Request path
-        method, request_path = self.data.decode().split(" ")[0:2]
+        try:
+            method, request_path = self.data.decode().split(" ")[0:2]
+        except ValueError:
+            return
 
         if method != "GET":
             self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r", "utf-8"))
@@ -46,35 +49,36 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(bytes(
                 f"HTTP/1.1 301 Moved Permanently\nLocation: {request_path}", "utf-8"))
             return
+
+
+        # Check which files to server
+        if request_path == "/" or request_path == "/index.html":
+            html_path = "./www/index.html"
         else:
-
-            # Check which files to server
-            if request_path == "/" or request_path == "/index.html":
-                html_path = "./www/index.html"
+            # If it doesn't end with .index.html, add it and if it has a / at the end remove it
+            if request_path[-1] == "/":
+                request_path = request_path[:-1]
+            if request_path.endswith(".html") or request_path.endswith(".css"):
+                html_path = f"./www{request_path}"
             else:
-                # If it doesn't end with .index.html, add it and if it has a / at the end remove it
-                if request_path[-1] == "/":
-                    request_path = request_path[:-1]
-                if request_path.endswith(".html") or request_path.endswith(".css"):
-                    html_path = f"./www{request_path}"
-                else:
-                    html_path = f"./www{request_path}/index.html"
+                html_path = f"./www{request_path}/index.html"
 
-            # Check if the file exists and send the file
-            if os.path.isfile(html_path):
-                # Open the files
-                html_file = open(html_path, "r")
-                file_content = html_file.read()
-                headers = "HTTP/1.1 200 OK\n"
-                if html_path.endswith(".css"):
-                    headers += "Content-Type: text/css; charset=utf-8\n"
-                else:
-                    headers += "Content-Type: text/html; charset=utf-8\n"
-                response = headers + file_content
-                html_file.close()
-                self.request.sendall(response.encode())
+        # Check if the file exists and send the file
+        if os.path.isfile(html_path):
+            # Open the files
+            html_file = open(html_path, "r")
+            file_content = html_file.read()
+            headers = "HTTP/1.1 200 OK\n"
+            if html_path.endswith(".css"):
+                headers += "Content-Type: text/css; charset=utf-8\n"
             else:
-                self.request.sendall(bytearray("HTTP/1.1 404 Not Found", "utf-8"))
+                headers += "Content-Type: text/html; charset=utf-8\n"
+            response = headers + file_content
+            html_file.close()
+            self.request.sendall(response.encode())
+        else:
+            response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
+            self.request.sendall(response.encode())
 
 
 if __name__ == "__main__":
