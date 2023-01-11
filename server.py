@@ -50,7 +50,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 f"HTTP/1.1 301 Moved Permanently\nLocation: {request_path}", "utf-8"))
             return
 
-
         # Check which files to server
         if request_path == "/" or request_path == "/index.html":
             html_path = "./www/index.html"
@@ -70,15 +69,17 @@ class MyWebServer(socketserver.BaseRequestHandler):
             file_content = html_file.read()
             headers = "HTTP/1.1 200 OK\n"
             if html_path.endswith(".css"):
-                headers += "Content-Type: text/css; charset=utf-8\n"
+                headers += "Content-Type: text/css; charset=utf-8\n\n"
             else:
-                headers += "Content-Type: text/html; charset=utf-8\n"
+                headers += "Content-Type: text/html; charset=utf-8\n\n"
             response = headers + file_content
             html_file.close()
             self.request.sendall(response.encode())
+
         else:
             response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
             self.request.sendall(response.encode())
+
 
 
 if __name__ == "__main__":
