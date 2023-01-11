@@ -37,7 +37,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
         # Request path
         method, request_path = self.data.decode().split(" ")[0:2]
-        print(f"Request path: {request_path}")
 
         if method != "GET":
             self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r", "utf-8"))
@@ -61,8 +60,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     html_path = f"./www{request_path}"
                 else:
                     html_path = f"./www{request_path}/index.html"
-
-            print(f"HTML path: {html_path}")
 
             # Check if the file exists and send the file
             if os.path.isfile(html_path):
