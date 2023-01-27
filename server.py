@@ -31,6 +31,7 @@ import socketserver
 
 class MyWebServer(socketserver.BaseRequestHandler):
 
+    # Copyright 2023 Akshat Pandey, Licensed under the Apache License, Version 2.0
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print("Got a request of: %s\n" % self.data)
@@ -79,7 +80,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
         else:
             response = 'HTTP/1.0 404 NOT FOUND\n\nFile Not Found'
             self.request.sendall(response.encode())
-
 
 
 if __name__ == "__main__":
